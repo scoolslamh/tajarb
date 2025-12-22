@@ -54,11 +54,10 @@
             width: 100%; padding: 12px; border: 1px solid #ccc;
             border-radius: 8px; font-family: 'Cairo'; font-size: 14px; outline: none;
         }
-        input:focus { border-color: var(--primary-color); }
 
-        .content-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 10px; }
+        .content-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 10px; position: relative; }
 
-        /* --- تصميم الكمبيوتر (Desktop) --- */
+        /* --- Desktop Design --- */
         table {
             width: 100%; border-collapse: collapse; background: #fff;
             border-radius: 12px; overflow: hidden; box-shadow: var(--shadow);
@@ -67,7 +66,7 @@
         td { padding: 12px; border: 1px solid #eee; text-align: center; font-size: 14px; }
         tr:nth-child(even) { background-color: #f9f9f9; }
 
-        /* --- تصميم الجوال (Mobile) --- */
+        /* --- Mobile Design --- */
         @media (max-width: 768px) {
             table, thead, tbody, th, td, tr { display: block; }
             thead { display: none; }
@@ -89,25 +88,31 @@
             }
         }
 
-        /* قائمة اتصال الجوال */
-        .phone-cell {
-            color: #1565c0; font-weight: bold; cursor: pointer;
-            text-decoration: underline;
-        }
+        .phone-cell { color: #1565c0; font-weight: bold; cursor: pointer; text-decoration: underline; }
 
         .phone-menu {
             position: absolute; background: #fff; border-radius: 10px;
             box-shadow: 0 5px 25px rgba(0,0,0,0.2); z-index: 9999;
             display: flex; flex-direction: column; min-width: 160px; border: 1px solid #eee;
-            overflow: hidden;
         }
         .phone-menu button {
             padding: 14px; border: none; background: none; text-align: right;
             font-family: 'Cairo'; cursor: pointer; border-bottom: 1px solid #f0f0f0;
-            display: flex; align-items: center; gap: 10px;
         }
-        .phone-menu button:hover { background: #f8fafc; }
-        .phone-menu button:last-child { border-bottom: none; }
+
+        /* --- Loading Spinner Style --- */
+        .spinner {
+            width: 30px; height: 30px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 15px auto;
+            display: none;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #mainSpinner { margin: 50px auto; }
 
         .login-overlay {
             position: fixed; inset: 0; background: #fff;
@@ -146,12 +151,15 @@
 </div>
 
 <div class="content-container">
+    <div id="mainSpinner" class="spinner"></div>
+
     <table id="resultsTable" style="display:none">
         <thead>
             <tr>
                 <th>الرقم الإحصائي</th>
                 <th>القطاع</th>
-                <th>العنوان</th> <th>النوع</th>
+                <th>العنوان</th>
+                <th>النوع</th>
                 <th>اسم المدرسة</th>
                 <th>اسم المدير/ة</th>
                 <th>رقم الجوال</th>
@@ -160,7 +168,7 @@
         <tbody id="tableBody"></tbody>
     </table>
     <div id="noResults" style="display:none; text-align:center; padding: 40px; color: #666;">
-        <i class="fas fa-info-circle"></i> لا توجد نتائج تطابق بحثك
+        لا توجد نتائج تطابق بحثك
     </div>
 </div>
 
@@ -168,11 +176,20 @@
 let schoolData = [];
 
 function fetchSchoolData() {
+    // إظهار السبنر عند بدء جلب البيانات
+    document.getElementById("mainSpinner").style.display = "block";
+    document.getElementById("resultsTable").style.display = "none";
+
     const api = "https://script.google.com/macros/s/AKfycbwmLZXbtQQuIui6c-zQTjQDsT4OPFM_YWWR3taupQ5A2hUg0TWXyZRBsxvsc56uMrDc/exec";
     fetch(api).then(r => r.json()).then(d => {
+        // إخفاء السبنر بعد الانتهاء
+        document.getElementById("mainSpinner").style.display = "none";
         schoolData = d.schools || [];
         populateFilters(schoolData);
         displayResults(schoolData);
+    }).catch(err => {
+        document.getElementById("mainSpinner").style.display = "none";
+        alert("خطأ في الاتصال بالبيانات");
     });
 }
 
@@ -195,12 +212,10 @@ function displayResults(data) {
 
     data.forEach(r => {
         const tr = document.createElement("tr");
-        
-        // ربط مفاتيح الجوجل شيت (التي بقيت 'المكتب') بمسميات الواجهة الجديدة ('العنوان')
         const config = [
             {key: 'الرقم الإحصائي', label: 'الرقم الإحصائي'},
             {key: 'القطاع', label: 'القطاع'},
-            {key: 'المكتب', label: 'العنوان'}, // هنا يتم الربط السحري
+            {key: 'المكتب', label: 'العنوان'},
             {key: 'النوع', label: 'النوع'},
             {key: 'اسم المدرسة', label: 'اسم المدرسة'},
             {key: 'اسم المدير/ة', label: 'المدير/ة'},
@@ -225,7 +240,7 @@ function displayResults(data) {
     document.getElementById("countValue").textContent = data.length;
 }
 
-// معالج القائمة المنسدلة للاتصال
+// قائمة الاتصال
 document.addEventListener("click", e => {
     document.querySelectorAll(".phone-menu").forEach(m => m.remove());
     const el = e.target.closest(".phone-cell");
@@ -235,9 +250,9 @@ document.addEventListener("click", e => {
         const menu = document.createElement("div");
         menu.className = "phone-menu";
         menu.innerHTML = `
-            <button onclick="window.location.href='tel:${phone}'"><i class="fas fa-phone"></i> اتصال هاتفي</button>
-            <button onclick="window.open('https://wa.me/${phone.replace(/^0/,'966')}','_blank')"><i class="fab fa-whatsapp"></i> واتساب</button>
-            <button onclick="copyToClipboard('${phone}')"><i class="fas fa-copy"></i> نسخ الرقم</button>
+            <button onclick="window.location.href='tel:${phone}'">📞 اتصال هاتفي</button>
+            <button onclick="window.open('https://wa.me/${phone.replace(/^0/,'966')}','_blank')">💬 واتساب</button>
+            <button onclick="copyToClipboard('${phone}')">📋 نسخ الرقم</button>
         `;
         document.body.appendChild(menu);
         const rect = el.getBoundingClientRect();
@@ -249,7 +264,7 @@ document.addEventListener("click", e => {
 
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text);
-    alert("تم نسخ الرقم إلى الحافظة");
+    alert("تم نسخ الرقم");
 }
 
 function filterResults() {
@@ -281,19 +296,28 @@ function showLogin() {
     document.body.insertAdjacentHTML("beforeend", `
         <div id="loginOverlay" class="login-overlay">
             <div class="login-card">
-                <i class="fas fa-shield-alt" style="font-size: 40px; color: var(--primary-color); margin-bottom: 15px;"></i>
-                <h3>تسجيل الدخول للنظام</h3>
-                <p style="font-size: 13px; color: #777;">يرجى إدخال الرمز الخاص بك للوصول للبيانات</p>
-                <input id="userCodeInput" type="password" placeholder="أدخل رمز الدخول" style="margin-top:10px;">
-                <button onclick="verifyUserCode()" style="display:block; width:100%; margin-top:15px; background:var(--primary-color); color:#fff; padding:12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">دخول</button>
-                <p id="loginError" style="color:red; display:none; margin-top:10px; font-size: 13px;">❌ الرمز المدخل غير صحيح</p>
+                <h3>تسجيل الدخول</h3>
+                <input id="userCodeInput" type="password" placeholder="أدخل الرمز">
+                <button id="loginBtn" onclick="verifyUserCode()" style="display:block; width:100%; margin-top:15px; background:var(--primary-color); color:#fff; padding:12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">دخول</button>
+                <div id="loginSpinner" class="spinner"></div>
+                <p id="loginError" style="color:red; display:none; margin-top:10px; font-size: 13px;">❌ الرمز غير صحيح</p>
             </div>
         </div>`);
 }
 
 function verifyUserCode() {
     const code = document.getElementById("userCodeInput").value;
+    const btn = document.getElementById("loginBtn");
+    const spinner = document.getElementById("loginSpinner");
+    const error = document.getElementById("loginError");
+
     if(!code) return;
+
+    // تفعيل السبنر وتعطيل الزر
+    btn.style.display = "none";
+    spinner.style.display = "block";
+    error.style.display = "none";
+
     fetch(`https://script.google.com/macros/s/AKfycbwmLZXbtQQuIui6c-zQTjQDsT4OPFM_YWWR3taupQ5A2hUg0TWXyZRBsxvsc56uMrDc/exec?code=${code}`)
     .then(r => r.json()).then(d => {
         if (d.status === "ok") {
@@ -301,7 +325,15 @@ function verifyUserCode() {
             sessionStorage.setItem("userName", d.name);
             sessionStorage.setItem("userRole", d.role);
             location.reload();
-        } else { document.getElementById("loginError").style.display = "block"; }
+        } else {
+            // إعادة الزر في حال الخطأ
+            spinner.style.display = "none";
+            btn.style.display = "block";
+            error.style.display = "block";
+        }
+    }).catch(() => {
+        spinner.style.display = "none";
+        btn.style.display = "block";
     });
 }
 
