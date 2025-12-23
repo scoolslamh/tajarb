@@ -361,6 +361,10 @@ function verifyUserCode() {
 }
 
 function logout() { sessionStorage.clear(); location.reload(); }
+
+    if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
 </script>
 </body>
 </html>
