@@ -1,0 +1,19 @@
+{
+  "name": "بيانات مدارس عسير",
+  "short_name": "مدارس عسير",
+  "description": "تطبيق استعلام عن بيانات المدارس بمنطقة عسير",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#1b5e20",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2991/2991148.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
