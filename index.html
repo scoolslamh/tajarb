@@ -56,7 +56,6 @@
 
         .content-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 10px; position: relative; }
 
-        /* Tables & Cards */
         table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
         th { background: var(--secondary-color); color: #fff; padding: 15px; font-size: 14px; }
         td { padding: 12px; border: 1px solid #eee; text-align: center; font-size: 14px; }
@@ -70,7 +69,6 @@
             td::before { content: attr(data-label); font-weight: 700; color: var(--primary-color); width: 40%; text-align: right; }
         }
 
-        /* Install Instructions Popup */
         #installGuide {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             width: 90%; max-width: 400px; background: #fff; border-radius: 15px;
@@ -78,16 +76,15 @@
             padding: 20px; display: none; border: 2px solid var(--primary-color);
         }
         #installGuide h4 { margin: 0 0 10px; color: var(--primary-color); }
-        #installGuide p { font-size: 14px; margin-bottom: 15px; line-height: 1.5; }
+        #installGuide p { font-size: 14px; margin-bottom: 15px; line-height: 1.5; color: #333; }
         #installGuide button {
             background: var(--primary-color); color: #fff; border: none;
             padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cairo';
         }
 
-        /* Phone Menu */
         .phone-cell { color: #1565c0; font-weight: bold; cursor: pointer; text-decoration: underline; }
         .phone-menu { position: absolute; background: #fff; border-radius: 10px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); z-index: 9999; display: flex; flex-direction: column; min-width: 180px; border: 1px solid #eee; overflow: hidden; }
-        .phone-menu button { padding: 14px; border: none; background: none; text-align: right; font-family: 'Cairo'; cursor: pointer; border-bottom: 1px solid #f0f0f0; color: #000; display: flex; align-items: center; gap: 10px; }
+        .phone-menu button { padding: 14px; border: none; background: none; text-align: right; font-family: 'Cairo'; cursor: pointer; border-bottom: 1px solid #f0f0f0; color: #000; display: flex; align-items: center; gap: 10px; font-weight: 600; }
         .fa-whatsapp { color: #25D366; }
 
         .spinner { width: 30px; height: 30px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; margin: 15px auto; display: none; }
@@ -126,7 +123,7 @@
         <input id="searchInput" type="text" placeholder="🔎 ابحث ثم اضغط Enter (3 أحرف فأكثر)">
     </div>
     <div style="text-align:center; margin-top:15px; color: var(--secondary-color); font-weight: bold;">
-        <span id="tooShortError" style="color:red; display:none; margin-left:10px;">⚠️ أدخل 3 أحرف/أرقام على الأقل</span>
+        <span id="tooShortError" style="color:red; display:none; margin-left:10px;">⚠️ أدخل 3 أحرف على الأقل</span>
         عدد النتائج: <span id="countValue">0</span>
     </div>
 </div>
@@ -153,14 +150,14 @@
 <script>
 let schoolData = [];
 
-// 1. حفظ الجلسة الدائم (LocalStorage)
+// 1. التحقق من الهوية واستدعاء البيانات
 function checkAuth() {
     const auth = localStorage.getItem("authenticated");
     if (auth === "true") {
         userNameLabel.textContent = localStorage.getItem("userName");
         userRoleLabel.textContent = localStorage.getItem("userRole");
-        fetchSchoolData();
-        showInstallGuide();
+        fetchSchoolData(); // استدعاء جلب البيانات
+        showInstallGuide(); // استدعاء إرشاد التثبيت
     } else {
         showLogin();
     }
@@ -174,7 +171,20 @@ function fetchSchoolData() {
         schoolData = d.schools || [];
         populateFilters(schoolData);
         displayResults(schoolData);
+    }).catch(err => {
+        document.getElementById("mainSpinner").style.display = "none";
+        console.error("Fetch error:", err);
     });
+}
+
+function populateFilters(data) {
+    const sFilter = document.getElementById("sectorFilter");
+    const tFilter = document.getElementById("typeFilter");
+    const sectors = [...new Set(data.map(r => r.القطاع))].filter(Boolean);
+    const types = [...new Set(data.map(r => r.النوع))].filter(Boolean);
+    
+    sectors.forEach(v => sFilter.innerHTML += `<option value="${v}">${v}</option>`);
+    types.forEach(v => tFilter.innerHTML += `<option value="${v}">${v}</option>`);
 }
 
 function displayResults(data) {
@@ -183,6 +193,7 @@ function displayResults(data) {
     if (data.length === 0) {
         document.getElementById("resultsTable").style.display = "none";
         document.getElementById("noResults").style.display = "block";
+        document.getElementById("countValue").textContent = "0";
         return;
     }
     data.forEach(r => {
@@ -210,10 +221,13 @@ function displayResults(data) {
     document.getElementById("countValue").textContent = data.length;
 }
 
-// 2. منطق الرسالة المنبثقة للتثبيت
+// 2. منطق رسالة التثبيت الذكي
 function showInstallGuide() {
-    // تظهر فقط إذا لم يسبق إغلاقها في هذه الجلسة
-    if (sessionStorage.getItem("guideClosed")) return;
+    // التحقق إذا كان التطبيق مفتوحاً كـ Standalone
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    const hasSeenGuide = localStorage.getItem("guideShownAfterLogin");
+
+    if (isStandalone || hasSeenGuide === "true") return;
 
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isAndroid = /Android/.test(navigator.userAgent);
@@ -221,24 +235,31 @@ function showInstallGuide() {
     const text = document.getElementById("guideText");
 
     if (isIOS) {
-        text.innerHTML = "لآيفون: اضغط على زر <b>المشاركة</b> في الأسفل ثم اختر <b>'إضافة إلى الشاشة الرئيسية'</b>.";
+        text.innerHTML = "لآيفون: اضغط على زر <b>المشاركة</b> <i class='fas fa-share-square'></i> في الأسفل ثم اختر <b>'إضافة إلى الشاشة الرئيسية'</b>.";
         guide.style.display = "block";
     } else if (isAndroid) {
-        text.innerHTML = "للأندرويد: اضغط على <b>نقاط القائمة</b> علوياً واختر <b>'تثبيت التطبيق'</b>.";
+        text.innerHTML = "للأندرويد: اضغط على <b>نقاط القائمة</b> <i class='fas fa-ellipsis-v'></i> علوياً واختر <b>'تثبيت التطبيق'</b>.";
         guide.style.display = "block";
     }
 }
 
 function closeGuide() {
     document.getElementById("installGuide").style.display = "none";
-    sessionStorage.setItem("guideClosed", "true");
+    localStorage.setItem("guideShownAfterLogin", "true");
 }
 
 function filterResults() {
     const q = searchInput.value.trim().toLowerCase();
     const sector = sectorFilter.value;
     const type = typeFilter.value;
-    if (q !== "" && q.length < 3) return;
+    const err = document.getElementById("tooShortError");
+
+    if (q !== "" && q.length < 3) {
+        err.style.display = "inline";
+        return;
+    }
+    err.style.display = "none";
+
     const res = schoolData.filter(r => {
         const fields = [String(r['الرقم الإحصائي']), String(r['اسم المدرسة']), String(r['اسم المدير/ة'])];
         return (!q || fields.some(f => f.toLowerCase().includes(q))) &&
@@ -252,6 +273,7 @@ sectorFilter.onchange = filterResults;
 typeFilter.onchange = filterResults;
 
 function showLogin() {
+    if(document.getElementById("loginOverlay")) return;
     document.body.insertAdjacentHTML("beforeend", `
         <div id="loginOverlay" class="login-overlay">
             <div class="login-card">
@@ -269,10 +291,10 @@ function verifyUserCode() {
     const btn = document.getElementById("loginBtn"), spinner = document.getElementById("loginSpinner");
     if(!code) return;
     btn.style.display = "none"; spinner.style.display = "block";
+    
     fetch(`https://script.google.com/macros/s/AKfycbwmLZXbtQQuIui6c-zQTjQDsT4OPFM_YWWR3taupQ5A2hUg0TWXyZRBsxvsc56uMrDc/exec?code=${code}`)
     .then(r => r.json()).then(d => {
         if (d.status === "ok") {
-            // حفظ البيانات في LocalStorage ليبقى مسجلاً
             localStorage.setItem("authenticated", "true");
             localStorage.setItem("userName", d.name);
             localStorage.setItem("userRole", d.role);
@@ -281,14 +303,18 @@ function verifyUserCode() {
             spinner.style.display = "none"; btn.style.display = "block";
             document.getElementById("loginError").style.display = "block";
         }
+    }).catch(() => {
+        spinner.style.display = "none"; btn.style.display = "block";
     });
 }
 
-function logout() { localStorage.clear(); location.reload(); }
+function logout() { 
+    localStorage.clear(); 
+    location.reload(); 
+}
 
 window.addEventListener("DOMContentLoaded", checkAuth);
 
-// ربط Service Worker
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
 
 document.addEventListener("click", e => {
@@ -298,9 +324,9 @@ document.addEventListener("click", e => {
         const phone = el.dataset.phone;
         const menu = document.createElement("div");
         menu.className = "phone-menu";
-        menu.innerHTML = `<button onclick="window.location.href='tel:${phone}'">📞 اتصال</button>
-                          <button onclick="window.open('https://wa.me/${phone.replace(/^0/,'966')}','_blank')"><i class="fab fa-whatsapp"></i> واتساب</button>
-                          <button onclick="navigator.clipboard.writeText('${phone}'); alert('تم النسخ')">📋 نسخ</button>`;
+        menu.innerHTML = `<button onclick="window.location.href='tel:${phone}'">📞 اتصال هاتفي</button>
+                          <button onclick="window.open('https://wa.me/${phone.replace(/^0/,'966')}','_blank')"><i class="fab fa-whatsapp"></i> إرسال واتساب</button>
+                          <button onclick="navigator.clipboard.writeText('${phone}'); alert('تم النسخ')">📋 نسخ الرقم</button>`;
         document.body.appendChild(menu);
         const r = el.getBoundingClientRect();
         menu.style.top = (r.bottom + window.scrollY) + "px"; menu.style.left = r.left + "px";
