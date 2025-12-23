@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>استعلام بيانات المدارس | عسير</title>
 
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1b5e20">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="مدارس عسير">
+
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
@@ -93,14 +99,20 @@
         .phone-menu {
             position: absolute; background: #fff; border-radius: 10px;
             box-shadow: 0 5px 25px rgba(0,0,0,0.2); z-index: 9999;
-            display: flex; flex-direction: column; min-width: 160px; border: 1px solid #eee;
+            display: flex; flex-direction: column; min-width: 180px; border: 1px solid #eee;
+            overflow: hidden;
         }
         .phone-menu button {
             padding: 14px; border: none; background: none; text-align: right;
             font-family: 'Cairo'; cursor: pointer; border-bottom: 1px solid #f0f0f0;
+            color: #000;
+            display: flex; align-items: center; gap: 10px; font-size: 14px;
         }
+        .phone-menu button i { width: 20px; text-align: center; }
+        .phone-menu button:hover { background: #f8fafc; }
+        .phone-menu button:last-child { border-bottom: none; }
+        .fa-whatsapp { color: #25D366; }
 
-        /* --- Loading Spinner Style --- */
         .spinner {
             width: 30px; height: 30px;
             border: 4px solid #f3f3f3;
@@ -143,16 +155,16 @@
     <div class="search-controls">
         <select id="sectorFilter"><option value="">📍 الكل - القطاع</option></select>
         <select id="typeFilter"><option value="">🏫 الكل - النوع</option></select>
-        <input id="searchInput" type="text" placeholder="🔎 ابحث باسم المدرسة أو المدير...">
+        <input id="searchInput" type="text" placeholder="🔎 ابحث ثم اضغط Enter (3 أحرف فأكثر)">
     </div>
     <div style="text-align:center; margin-top:15px; color: var(--secondary-color); font-weight: bold;">
+        <span id="tooShortError" style="color:red; display:none; margin-left:10px;">⚠️ أدخل 3 أحرف/أرقام على الأقل</span>
         عدد النتائج: <span id="countValue">0</span>
     </div>
 </div>
 
 <div class="content-container">
     <div id="mainSpinner" class="spinner"></div>
-
     <table id="resultsTable" style="display:none">
         <thead>
             <tr>
@@ -176,18 +188,16 @@
 let schoolData = [];
 
 function fetchSchoolData() {
-    // إظهار السبنر عند بدء جلب البيانات
     document.getElementById("mainSpinner").style.display = "block";
     document.getElementById("resultsTable").style.display = "none";
 
     const api = "https://script.google.com/macros/s/AKfycbwmLZXbtQQuIui6c-zQTjQDsT4OPFM_YWWR3taupQ5A2hUg0TWXyZRBsxvsc56uMrDc/exec";
     fetch(api).then(r => r.json()).then(d => {
-        // إخفاء السبنر بعد الانتهاء
         document.getElementById("mainSpinner").style.display = "none";
         schoolData = d.schools || [];
         populateFilters(schoolData);
         displayResults(schoolData);
-    }).catch(err => {
+    }).catch(() => {
         document.getElementById("mainSpinner").style.display = "none";
         alert("خطأ في الاتصال بالبيانات");
     });
@@ -203,13 +213,12 @@ function populateFilters(data) {
 function displayResults(data) {
     const tbody = document.getElementById("tableBody");
     tbody.innerHTML = "";
-    
     if (data.length === 0) {
         document.getElementById("resultsTable").style.display = "none";
         document.getElementById("noResults").style.display = "block";
+        document.getElementById("countValue").textContent = "0";
         return;
     }
-
     data.forEach(r => {
         const tr = document.createElement("tr");
         const config = [
@@ -221,7 +230,6 @@ function displayResults(data) {
             {key: 'اسم المدير/ة', label: 'المدير/ة'},
             {key: 'رقم الجوال', label: 'رقم الجوال'}
         ];
-
         config.forEach(item => {
             const td = document.createElement("td");
             td.setAttribute('data-label', item.label);
@@ -234,13 +242,48 @@ function displayResults(data) {
         });
         tbody.appendChild(tr);
     });
-
     document.getElementById("resultsTable").style.display = "table";
     document.getElementById("noResults").style.display = "none";
     document.getElementById("countValue").textContent = data.length;
 }
 
-// قائمة الاتصال
+function filterResults() {
+    const q = searchInput.value.trim().toLowerCase();
+    const sector = sectorFilter.value;
+    const type = typeFilter.value;
+    const errorSpan = document.getElementById("tooShortError");
+
+    if (q !== "" && q.length < 3) {
+        errorSpan.style.display = "inline";
+        return;
+    }
+    errorSpan.style.display = "none";
+
+    const res = schoolData.filter(r => {
+        const searchFields = [
+            String(r['الرقم الإحصائي'] || "").toLowerCase(),
+            String(r['اسم المدرسة'] || "").toLowerCase(),
+            String(r['اسم المدير/ة'] || "").toLowerCase()
+        ];
+        
+        const matchesSearch = !q || searchFields.some(field => field.includes(q));
+        const matchesSector = !sector || r.القطاع === sector;
+        const matchesType = !type || r.النوع === type;
+        
+        return matchesSearch && matchesSector && matchesType;
+    });
+    displayResults(res);
+}
+
+document.getElementById("searchInput").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+        filterResults();
+    }
+});
+
+sectorFilter.onchange = filterResults;
+typeFilter.onchange = filterResults;
+
 document.addEventListener("click", e => {
     document.querySelectorAll(".phone-menu").forEach(m => m.remove());
     const el = e.target.closest(".phone-cell");
@@ -250,9 +293,9 @@ document.addEventListener("click", e => {
         const menu = document.createElement("div");
         menu.className = "phone-menu";
         menu.innerHTML = `
-            <button onclick="window.location.href='tel:${phone}'">📞 اتصال هاتفي</button>
-            <button onclick="window.open('https://wa.me/${phone.replace(/^0/,'966')}','_blank')">💬 واتساب</button>
-            <button onclick="copyToClipboard('${phone}')">📋 نسخ الرقم</button>
+            <button onclick="window.location.href='tel:${phone}'"><i class="fas fa-phone-alt"></i> اتصال هاتفي</button>
+            <button onclick="window.open('https://wa.me/${phone.replace(/^0/,'966')}','_blank')"><i class="fab fa-whatsapp"></i> إرسال واتساب</button>
+            <button onclick="copyToClipboard('${phone}')"><i class="fas fa-copy"></i> نسخ الرقم</button>
         `;
         document.body.appendChild(menu);
         const rect = el.getBoundingClientRect();
@@ -267,26 +310,11 @@ function copyToClipboard(text) {
     alert("تم نسخ الرقم");
 }
 
-function filterResults() {
-    const q = searchInput.value.trim().toLowerCase();
-    const sector = sectorFilter.value;
-    const type = typeFilter.value;
-    const res = schoolData.filter(r => 
-        (!q || Object.values(r).some(v => String(v).toLowerCase().includes(q))) &&
-        (!sector || r.القطاع === sector) &&
-        (!type || r.النوع === type)
-    );
-    displayResults(res);
-}
-
 window.addEventListener("DOMContentLoaded", () => {
     if (sessionStorage.getItem("authenticated") === "true") {
         userNameLabel.textContent = sessionStorage.getItem("userName");
         userRoleLabel.textContent = sessionStorage.getItem("userRole");
         fetchSchoolData();
-        searchInput.oninput = filterResults;
-        sectorFilter.onchange = filterResults;
-        typeFilter.onchange = filterResults;
     } else {
         showLogin();
     }
@@ -310,23 +338,18 @@ function verifyUserCode() {
     const btn = document.getElementById("loginBtn");
     const spinner = document.getElementById("loginSpinner");
     const error = document.getElementById("loginError");
-
     if(!code) return;
-
-    // تفعيل السبنر وتعطيل الزر
     btn.style.display = "none";
     spinner.style.display = "block";
     error.style.display = "none";
-
     fetch(`https://script.google.com/macros/s/AKfycbwmLZXbtQQuIui6c-zQTjQDsT4OPFM_YWWR3taupQ5A2hUg0TWXyZRBsxvsc56uMrDc/exec?code=${code}`)
     .then(r => r.json()).then(d => {
         if (d.status === "ok") {
-            sessionStorage.setItem("authenticated", "true");
+            sessionStorage.setItem("authenticated","true");
             sessionStorage.setItem("userName", d.name);
             sessionStorage.setItem("userRole", d.role);
             location.reload();
         } else {
-            // إعادة الزر في حال الخطأ
             spinner.style.display = "none";
             btn.style.display = "block";
             error.style.display = "block";
