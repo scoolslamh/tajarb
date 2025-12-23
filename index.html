@@ -9,7 +9,6 @@
     <meta name="theme-color" content="#1b5e20">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="مدارس عسير">
 
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -36,17 +35,11 @@
             color: #fff; padding: 25px 15px; text-align: center;
         }
         .main-header h1 { margin: 0; font-size: 1.3rem; }
-        .main-header h2 { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.8; }
 
         .top-bar {
             display: flex; justify-content: space-between; align-items: center;
             background: #fff; padding: 12px 20px; border-bottom: 1px solid #ddd;
             flex-wrap: wrap; gap: 10px;
-        }
-        #userInfo { font-size: 14px; color: var(--secondary-color); font-weight: 600; }
-        .logout-btn {
-            padding: 6px 15px; border: 1px solid #d32f2f; color: #d32f2f;
-            background: none; border-radius: 6px; cursor: pointer; font-family: 'Cairo';
         }
 
         .search-wrapper {
@@ -63,81 +56,56 @@
 
         .content-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 10px; position: relative; }
 
-        /* --- Desktop Design --- */
-        table {
-            width: 100%; border-collapse: collapse; background: #fff;
-            border-radius: 12px; overflow: hidden; box-shadow: var(--shadow);
-        }
-        th { background: var(--secondary-color); color: #fff; padding: 15px; font-size: 14px; white-space: nowrap; }
+        /* Tables & Cards */
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
+        th { background: var(--secondary-color); color: #fff; padding: 15px; font-size: 14px; }
         td { padding: 12px; border: 1px solid #eee; text-align: center; font-size: 14px; }
         tr:nth-child(even) { background-color: #f9f9f9; }
 
-        /* --- Mobile Design --- */
         @media (max-width: 768px) {
             table, thead, tbody, th, td, tr { display: block; }
             thead { display: none; }
-            tr {
-                margin-bottom: 20px; border: 1px solid #ddd;
-                border-radius: 15px; background: #fff; padding: 15px;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-                border-top: 4px solid var(--secondary-color);
-            }
-            td {
-                text-align: left; padding: 12px 5px; border: none;
-                display: flex; justify-content: space-between; align-items: center;
-                border-bottom: 1px solid #f1f1f1;
-            }
-            td:last-child { border-bottom: none; }
-            td::before {
-                content: attr(data-label); font-weight: 700;
-                color: var(--primary-color); width: 40%; text-align: right;
-            }
+            tr { margin-bottom: 20px; border: 1px solid #ddd; border-radius: 15px; background: #fff; padding: 15px; border-top: 4px solid var(--secondary-color); }
+            td { text-align: left; padding: 12px 5px; border: none; display: flex; justify-content: space-between; border-bottom: 1px solid #f1f1f1; }
+            td::before { content: attr(data-label); font-weight: 700; color: var(--primary-color); width: 40%; text-align: right; }
         }
 
+        /* Install Instructions Popup */
+        #installGuide {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 400px; background: #fff; border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 11000;
+            padding: 20px; display: none; border: 2px solid var(--primary-color);
+        }
+        #installGuide h4 { margin: 0 0 10px; color: var(--primary-color); }
+        #installGuide p { font-size: 14px; margin-bottom: 15px; line-height: 1.5; }
+        #installGuide button {
+            background: var(--primary-color); color: #fff; border: none;
+            padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: 'Cairo';
+        }
+
+        /* Phone Menu */
         .phone-cell { color: #1565c0; font-weight: bold; cursor: pointer; text-decoration: underline; }
-
-        .phone-menu {
-            position: absolute; background: #fff; border-radius: 10px;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.2); z-index: 9999;
-            display: flex; flex-direction: column; min-width: 180px; border: 1px solid #eee;
-            overflow: hidden;
-        }
-        .phone-menu button {
-            padding: 14px; border: none; background: none; text-align: right;
-            font-family: 'Cairo'; cursor: pointer; border-bottom: 1px solid #f0f0f0;
-            color: #000;
-            display: flex; align-items: center; gap: 10px; font-size: 14px;
-        }
-        .phone-menu button i { width: 20px; text-align: center; }
-        .phone-menu button:hover { background: #f8fafc; }
-        .phone-menu button:last-child { border-bottom: none; }
+        .phone-menu { position: absolute; background: #fff; border-radius: 10px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); z-index: 9999; display: flex; flex-direction: column; min-width: 180px; border: 1px solid #eee; overflow: hidden; }
+        .phone-menu button { padding: 14px; border: none; background: none; text-align: right; font-family: 'Cairo'; cursor: pointer; border-bottom: 1px solid #f0f0f0; color: #000; display: flex; align-items: center; gap: 10px; }
         .fa-whatsapp { color: #25D366; }
 
-        .spinner {
-            width: 30px; height: 30px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 15px auto;
-            display: none;
-        }
+        .spinner { width: 30px; height: 30px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; margin: 15px auto; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        #mainSpinner { margin: 50px auto; }
-
-        .login-overlay {
-            position: fixed; inset: 0; background: #fff;
-            display: flex; align-items: center; justify-content: center; z-index: 10000;
-        }
-        .login-card {
-            width: 90%; max-width: 380px; padding: 35px; border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1); text-align: center;
-            border-top: 6px solid var(--primary-color);
-        }
+        .login-overlay { position: fixed; inset: 0; background: #fff; display: flex; align-items: center; justify-content: center; z-index: 10000; }
+        .login-card { width: 90%; max-width: 380px; padding: 35px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); text-align: center; border-top: 6px solid var(--primary-color); }
     </style>
 </head>
 <body>
+
+<div id="installGuide">
+    <h4>📲 ثبت التطبيق على هاتفك</h4>
+    <p id="guideText"></p>
+    <div style="text-align: left;">
+        <button onclick="closeGuide()">فهمت</button>
+    </div>
+</div>
 
 <div class="main-header">
     <h1>الإدارة العامة للتعليم بمنطقة عسير</h1>
@@ -179,35 +147,34 @@
         </thead>
         <tbody id="tableBody"></tbody>
     </table>
-    <div id="noResults" style="display:none; text-align:center; padding: 40px; color: #666;">
-        لا توجد نتائج تطابق بحثك
-    </div>
+    <div id="noResults" style="display:none; text-align:center; padding: 40px; color: #666;">لا توجد نتائج</div>
 </div>
 
 <script>
 let schoolData = [];
 
+// 1. حفظ الجلسة الدائم (LocalStorage)
+function checkAuth() {
+    const auth = localStorage.getItem("authenticated");
+    if (auth === "true") {
+        userNameLabel.textContent = localStorage.getItem("userName");
+        userRoleLabel.textContent = localStorage.getItem("userRole");
+        fetchSchoolData();
+        showInstallGuide();
+    } else {
+        showLogin();
+    }
+}
+
 function fetchSchoolData() {
     document.getElementById("mainSpinner").style.display = "block";
-    document.getElementById("resultsTable").style.display = "none";
-
     const api = "https://script.google.com/macros/s/AKfycbwmLZXbtQQuIui6c-zQTjQDsT4OPFM_YWWR3taupQ5A2hUg0TWXyZRBsxvsc56uMrDc/exec";
     fetch(api).then(r => r.json()).then(d => {
         document.getElementById("mainSpinner").style.display = "none";
         schoolData = d.schools || [];
         populateFilters(schoolData);
         displayResults(schoolData);
-    }).catch(() => {
-        document.getElementById("mainSpinner").style.display = "none";
-        alert("خطأ في الاتصال بالبيانات");
     });
-}
-
-function populateFilters(data) {
-    const sectors = [...new Set(data.map(r => r.القطاع))].filter(Boolean);
-    const types = [...new Set(data.map(r => r.النوع))].filter(Boolean);
-    sectors.forEach(v => sectorFilter.innerHTML += `<option value="${v}">${v}</option>`);
-    types.forEach(v => typeFilter.innerHTML += `<option value="${v}">${v}</option>`);
 }
 
 function displayResults(data) {
@@ -216,19 +183,15 @@ function displayResults(data) {
     if (data.length === 0) {
         document.getElementById("resultsTable").style.display = "none";
         document.getElementById("noResults").style.display = "block";
-        document.getElementById("countValue").textContent = "0";
         return;
     }
     data.forEach(r => {
         const tr = document.createElement("tr");
         const config = [
-            {key: 'الرقم الإحصائي', label: 'الرقم الإحصائي'},
-            {key: 'القطاع', label: 'القطاع'},
-            {key: 'المكتب', label: 'العنوان'},
-            {key: 'النوع', label: 'النوع'},
-            {key: 'اسم المدرسة', label: 'اسم المدرسة'},
-            {key: 'اسم المدير/ة', label: 'المدير/ة'},
-            {key: 'رقم الجوال', label: 'رقم الجوال'}
+            {key:'الرقم الإحصائي', label:'الرقم الإحصائي'}, {key:'القطاع', label:'القطاع'},
+            {key:'المكتب', label:'العنوان'}, {key:'النوع', label:'النوع'},
+            {key:'اسم المدرسة', label:'اسم المدرسة'}, {key:'اسم المدير/ة', label:'المدير/ة'},
+            {key:'رقم الجوال', label:'رقم الجوال'}
         ];
         config.forEach(item => {
             const td = document.createElement("td");
@@ -247,78 +210,46 @@ function displayResults(data) {
     document.getElementById("countValue").textContent = data.length;
 }
 
+// 2. منطق الرسالة المنبثقة للتثبيت
+function showInstallGuide() {
+    // تظهر فقط إذا لم يسبق إغلاقها في هذه الجلسة
+    if (sessionStorage.getItem("guideClosed")) return;
+
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isAndroid = /Android/.test(navigator.userAgent);
+    const guide = document.getElementById("installGuide");
+    const text = document.getElementById("guideText");
+
+    if (isIOS) {
+        text.innerHTML = "لآيفون: اضغط على زر <b>المشاركة</b> في الأسفل ثم اختر <b>'إضافة إلى الشاشة الرئيسية'</b>.";
+        guide.style.display = "block";
+    } else if (isAndroid) {
+        text.innerHTML = "للأندرويد: اضغط على <b>نقاط القائمة</b> علوياً واختر <b>'تثبيت التطبيق'</b>.";
+        guide.style.display = "block";
+    }
+}
+
+function closeGuide() {
+    document.getElementById("installGuide").style.display = "none";
+    sessionStorage.setItem("guideClosed", "true");
+}
+
 function filterResults() {
     const q = searchInput.value.trim().toLowerCase();
     const sector = sectorFilter.value;
     const type = typeFilter.value;
-    const errorSpan = document.getElementById("tooShortError");
-
-    if (q !== "" && q.length < 3) {
-        errorSpan.style.display = "inline";
-        return;
-    }
-    errorSpan.style.display = "none";
-
+    if (q !== "" && q.length < 3) return;
     const res = schoolData.filter(r => {
-        const searchFields = [
-            String(r['الرقم الإحصائي'] || "").toLowerCase(),
-            String(r['اسم المدرسة'] || "").toLowerCase(),
-            String(r['اسم المدير/ة'] || "").toLowerCase()
-        ];
-        
-        const matchesSearch = !q || searchFields.some(field => field.includes(q));
-        const matchesSector = !sector || r.القطاع === sector;
-        const matchesType = !type || r.النوع === type;
-        
-        return matchesSearch && matchesSector && matchesType;
+        const fields = [String(r['الرقم الإحصائي']), String(r['اسم المدرسة']), String(r['اسم المدير/ة'])];
+        return (!q || fields.some(f => f.toLowerCase().includes(q))) &&
+               (!sector || r.القطاع === sector) && (!type || r.النوع === type);
     });
     displayResults(res);
 }
 
-document.getElementById("searchInput").addEventListener("keypress", function(e) {
-    if (e.key === "Enter") {
-        filterResults();
-    }
-});
-
+document.getElementById("searchInput").addEventListener("keypress", (e) => e.key === "Enter" && filterResults());
 sectorFilter.onchange = filterResults;
 typeFilter.onchange = filterResults;
-
-document.addEventListener("click", e => {
-    document.querySelectorAll(".phone-menu").forEach(m => m.remove());
-    const el = e.target.closest(".phone-cell");
-    if (el) {
-        e.preventDefault();
-        const phone = el.dataset.phone;
-        const menu = document.createElement("div");
-        menu.className = "phone-menu";
-        menu.innerHTML = `
-            <button onclick="window.location.href='tel:${phone}'"><i class="fas fa-phone-alt"></i> اتصال هاتفي</button>
-            <button onclick="window.open('https://wa.me/${phone.replace(/^0/,'966')}','_blank')"><i class="fab fa-whatsapp"></i> إرسال واتساب</button>
-            <button onclick="copyToClipboard('${phone}')"><i class="fas fa-copy"></i> نسخ الرقم</button>
-        `;
-        document.body.appendChild(menu);
-        const rect = el.getBoundingClientRect();
-        menu.style.top = (rect.bottom + window.scrollY) + "px";
-        menu.style.left = rect.left + "px";
-        e.stopPropagation();
-    }
-});
-
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text);
-    alert("تم نسخ الرقم");
-}
-
-window.addEventListener("DOMContentLoaded", () => {
-    if (sessionStorage.getItem("authenticated") === "true") {
-        userNameLabel.textContent = sessionStorage.getItem("userName");
-        userRoleLabel.textContent = sessionStorage.getItem("userRole");
-        fetchSchoolData();
-    } else {
-        showLogin();
-    }
-});
 
 function showLogin() {
     document.body.insertAdjacentHTML("beforeend", `
@@ -328,43 +259,54 @@ function showLogin() {
                 <input id="userCodeInput" type="password" placeholder="أدخل الرمز">
                 <button id="loginBtn" onclick="verifyUserCode()" style="display:block; width:100%; margin-top:15px; background:var(--primary-color); color:#fff; padding:12px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">دخول</button>
                 <div id="loginSpinner" class="spinner"></div>
-                <p id="loginError" style="color:red; display:none; margin-top:10px; font-size: 13px;">❌ الرمز غير صحيح</p>
+                <p id="loginError" style="color:red; display:none; margin-top:10px;">❌ الرمز غير صحيح</p>
             </div>
         </div>`);
 }
 
 function verifyUserCode() {
     const code = document.getElementById("userCodeInput").value;
-    const btn = document.getElementById("loginBtn");
-    const spinner = document.getElementById("loginSpinner");
-    const error = document.getElementById("loginError");
+    const btn = document.getElementById("loginBtn"), spinner = document.getElementById("loginSpinner");
     if(!code) return;
-    btn.style.display = "none";
-    spinner.style.display = "block";
-    error.style.display = "none";
+    btn.style.display = "none"; spinner.style.display = "block";
     fetch(`https://script.google.com/macros/s/AKfycbwmLZXbtQQuIui6c-zQTjQDsT4OPFM_YWWR3taupQ5A2hUg0TWXyZRBsxvsc56uMrDc/exec?code=${code}`)
     .then(r => r.json()).then(d => {
         if (d.status === "ok") {
-            sessionStorage.setItem("authenticated","true");
-            sessionStorage.setItem("userName", d.name);
-            sessionStorage.setItem("userRole", d.role);
+            // حفظ البيانات في LocalStorage ليبقى مسجلاً
+            localStorage.setItem("authenticated", "true");
+            localStorage.setItem("userName", d.name);
+            localStorage.setItem("userRole", d.role);
             location.reload();
         } else {
-            spinner.style.display = "none";
-            btn.style.display = "block";
-            error.style.display = "block";
+            spinner.style.display = "none"; btn.style.display = "block";
+            document.getElementById("loginError").style.display = "block";
         }
-    }).catch(() => {
-        spinner.style.display = "none";
-        btn.style.display = "block";
     });
 }
 
-function logout() { sessionStorage.clear(); location.reload(); }
+function logout() { localStorage.clear(); location.reload(); }
 
-    if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js');
-}
+window.addEventListener("DOMContentLoaded", checkAuth);
+
+// ربط Service Worker
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+
+document.addEventListener("click", e => {
+    document.querySelectorAll(".phone-menu").forEach(m => m.remove());
+    const el = e.target.closest(".phone-cell");
+    if (el) {
+        const phone = el.dataset.phone;
+        const menu = document.createElement("div");
+        menu.className = "phone-menu";
+        menu.innerHTML = `<button onclick="window.location.href='tel:${phone}'">📞 اتصال</button>
+                          <button onclick="window.open('https://wa.me/${phone.replace(/^0/,'966')}','_blank')"><i class="fab fa-whatsapp"></i> واتساب</button>
+                          <button onclick="navigator.clipboard.writeText('${phone}'); alert('تم النسخ')">📋 نسخ</button>`;
+        document.body.appendChild(menu);
+        const r = el.getBoundingClientRect();
+        menu.style.top = (r.bottom + window.scrollY) + "px"; menu.style.left = r.left + "px";
+        e.stopPropagation();
+    }
+});
 </script>
 </body>
 </html>
